@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding CoKRAG 2.0: The Next Evolution in AI Reasoning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
+        }
+        .card {
+            background-color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+        }
+        .flow-step {
+            border-left: 3px solid #0d9488; /* teal-600 */
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        .flow-step::before {
+            content: '';
+            position: absolute;
+            left: -9px;
+            top: 0;
+            width: 16px;
+            height: 16px;
+            border-radius: 9999px;
+            background-color: white;
+            border: 3px solid #0d9488; /* teal-600 */
+        }
+        .highlight-teal {
+            color: #14b8a6; /* teal-500 */
+        }
+        .bg-highlight-teal {
+            background-color: #14b8a6; /* teal-500 */
+        }
+        
+        /* --- Enhanced Animation Styles --- */
+        .anim-node {
+            position: absolute;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: scale(0.9);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .anim-line {
+            position: absolute;
+            background-color: #94a3b8; /* slate-400 */
+            height: 2px;
+            transform-origin: left center;
+            width: 0;
+            transition: width 0.7s ease;
+        }
+        .is-playing .anim-node {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .is-playing .anim-line {
+            width: var(--line-width, 100px);
+        }
+        .pruned {
+             opacity: 0.3 !important;
+             filter: grayscale(80%);
+        }
+
+        /* Keyframes for pulsing effect */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1) translateX(-50%); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+            50% { transform: scale(1.05) translateX(-50%); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.2); }
+        }
+        .final-answer-pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <h1 class="text-4xl font-bold text-slate-900 tracking-tight">Understanding CoKRAG 2.0</h1>
+            <p class="mt-2 text-lg text-slate-600">Reasoning Across Text, Data, and Images with Next-Generation AI</p>
+        </div>
+    </header>
+
+    <main class="py-12">
+
+        <!-- Introduction: The Problem with Animation -->
+        <section id="problem" class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-slate-800">The Challenge: Reasoning Like a Human</h2>
+            <div class="mt-4 text-slate-700 space-y-4 text-base leading-relaxed max-w-4xl">
+                <p>Standard AI assistants are good at simple lookups, but they struggle with questions that require connecting different types of information—like text, tables, and images. This is because their reasoning is often linear and confined to a single data type.</p>
+                <p><strong class="highlight-teal">CoKRAG 2.0</strong> is designed to overcome this. It gives the AI an ability to plan, execute parallel lines of reasoning, and synthesize insights from diverse sources, much like a human researcher would.</p>
+            </div>
+        </section>
+
+        <!-- Full-width Interactive Visualization -->
+        <section id="interactive-visualization" class="mt-12 bg-slate-100 border-y border-slate-200">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <h3 class="text-2xl font-bold text-slate-800 text-center">Interactive Demo: Multi-Modal Reasoning</h3>
+                <div class="mt-4 p-4 card max-w-4xl mx-auto bg-slate-50 border-slate-200">
+                    <p class="text-center text-slate-600">
+                        <strong class="text-slate-800">Advanced Multi-Modal Query:</strong><br>
+                        <em class="font-semibold">"Show me a picture of the lead actor from a movie that was scored by the composer for 'The Dark Knight' and had a budget over $150M."</em>
+                    </p>
+                </div>
+
+                <div id="animation-wrapper" class="mt-8 relative w-full h-[500px] overflow-hidden">
+                    <!-- Animation will be dynamically generated here by JS -->
+                </div>
+
+                <div class="mt-6 flex justify-center items-center gap-4">
+                    <button id="play-btn" class="px-6 py-2 bg-teal-600 text-white font-semibold rounded-lg shadow-md hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-75 transition">
+                        Play Animation
+                    </button>
+                    <button id="reset-btn" class="px-6 py-2 bg-slate-600 text-white font-semibold rounded-lg shadow-md hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-opacity-75 transition">
+                        Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- Core Concepts -->
+        <section id="concepts" class="mt-16 container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-slate-800 text-center">The Core Upgrades in CoKRAG 2.0</h2>
+            <p class="mt-4 text-lg text-slate-600 text-center max-w-3xl mx-auto">CoKRAG 2.0 introduces three key enhancements that enable more powerful and efficient reasoning.</p>
+            <div class="mt-10 grid md:grid-cols-3 gap-8">
+                <!-- Pillar 1: Multi-Modal KGs -->
+                <div class="card p-6 text-center">
+                    <div class="flex justify-center">
+                         <svg class="w-16 h-16 highlight-teal" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                         </svg>
+                    </div>
+                    <h3 class="mt-4 text-xl font-bold text-slate-900">Multi-Modal Knowledge</h3>
+                    <p class="mt-2 text-slate-600">The Knowledge Graph is no longer limited to text. It now connects entities to images, data tables, and documents, allowing the AI to reason across different types of information.</p>
+                </div>
+                <!-- Pillar 2: Dynamic & Efficient Reasoning -->
+                <div class="card p-6 text-center">
+                    <div class="flex justify-center">
+                       <svg class="w-16 h-16 highlight-teal" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+                       </svg>
+                    </div>
+                    <h3 class="mt-4 text-xl font-bold text-slate-900">Efficient & Dynamic KG</h3>
+                    <p class="mt-2 text-slate-600">The agent executes reasoning steps in parallel and intelligently "prunes" irrelevant paths to save time. The KG is updated in real-time as new facts are discovered or corrected.</p>
+                </div>
+                <!-- Pillar 3: Advanced Agentic Planning -->
+                <div class="card p-6 text-center">
+                    <div class="flex justify-center">
+                        <svg class="w-16 h-16 highlight-teal" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 1 0 7.5 7.5h-7.5V6Z" />
+                           <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0 0 13.5 3v7.5Z" />
+                        </svg>
+                    </div>
+                    <h3 class="mt-4 text-xl font-bold text-slate-900">Advanced Agentic Planning</h3>
+                    <p class="mt-2 text-slate-600">The AI agent can now create more complex plans, identifying steps that can be performed simultaneously and adapting its strategy based on the information it finds.</p>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- The CoKRAG Framework Flow -->
+        <section id="framework" class="mt-20 container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl font-bold text-slate-800 text-center">CoKRAG 2.0 Framework in Action</h2>
+            <p class="mt-4 text-lg text-slate-600 text-center max-w-3xl mx-auto">Here's the updated workflow, incorporating parallel execution and multi-modal data.</p>
+            
+            <div class="mt-12">
+                <div class="flow-step pb-12">
+                    <h3 class="text-xl font-semibold text-slate-800">Step 1: Decompose into Parallel Tasks</h3>
+                    <p class="mt-2 text-slate-600">The agent breaks the query into independent reasoning paths that can be explored at the same time.</p>
+                    <div class="mt-4 card p-4 bg-slate-50 border border-slate-200">
+                        <p class="font-mono text-sm text-slate-700">
+                            <strong class="text-slate-900">Parallel Plan:</strong><br>
+                            <span class="text-blue-600 font-semibold">[Path A]</span> 1. Find composer for 'The Dark Knight'. 2. Find other movies by this composer.<br>
+                            <span class="text-green-600 font-semibold">[Path B]</span> 1. Search movie database for films with budget > $150M.<br>
+                            <strong class="text-purple-600 font-semibold">[Synthesis]</strong> Find movies that appear in both Path A and Path B, then find the lead actor and their picture.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flow-step pb-12">
+                    <h3 class="text-xl font-semibold text-slate-800">Step 2: Execute, Prune, and Synthesize</h3>
+                    <p class="mt-2 text-slate-600">The agent executes the paths, retrieving text, table data, and images. It prunes dead-end paths (e.g., a movie by the right composer but with the wrong budget) to increase efficiency.</p>
+                    <div class="mt-4 card p-6">
+                        <div class="font-mono text-sm text-slate-700 space-y-4">
+                            <p class="text-center italic text-slate-500">(This complex process is visualized in the interactive demo above, including the pruning of irrelevant branches.)</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flow-step pb-12">
+                    <h3 class="text-xl font-semibold text-slate-800">Step 3: Construct Multi-Modal Chain-of-Knowledge</h3>
+                    <p class="mt-2 text-slate-600">The final reasoning chain now includes references to different data types, creating a rich, verifiable evidence trail.</p>
+                     <div class="mt-4 card p-4 bg-teal-50 border border-teal-200">
+                        <p class="font-mono text-sm text-teal-800">
+                            <strong class="text-teal-900">Generated Chain-of-Knowledge:</strong><br>
+                            - Step 1: Found composer for 'The Dark Knight' is <strong class="text-teal-900">Hans Zimmer</strong>.<br>
+                            - Step 2: Found movies by Zimmer include 'Inception', 'Interstellar', 'Dune'. <span class="text-red-500">(Pruned 'Gladiator' - budget too low)</span>.<br>
+                            - Step 3: From <strong class="text-teal-900">[Table Data]</strong>, confirmed 'Inception' budget is $160M.<br>
+                            - Step 4: Found lead actor of 'Inception' is <strong class="text-teal-900">Leonardo DiCaprio</strong>.<br>
+                            - Step 5: Retrieved <strong class="text-teal-900">[Image]</strong> of Leonardo DiCaprio.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flow-step">
+                    <h3 class="text-xl font-semibold text-slate-800">Step 4: Generate Multi-Modal Answer</h3>
+                    <p class="mt-2 text-slate-600">The final output synthesizes all the retrieved information into a comprehensive, multi-modal answer.</p>
+                     <div class="mt-4 card p-6 bg-slate-800 text-white flex items-center gap-6">
+                        <img src="https://placehold.co/150x200/e2e8f0/334155?text=L.+DiCaprio" alt="Image of Leonardo DiCaprio" class="rounded-lg shadow-lg"/>
+                        <div>
+                            <h4 class="font-semibold">Final Answer:</h4>
+                            <p class="mt-2 text-slate-200 text-lg">The lead actor is <strong class="text-teal-300">Leonardo DiCaprio</strong>. He starred in 'Inception', which was scored by Hans Zimmer (composer for 'The Dark Knight') and had a budget of $160M.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-400 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
+            <p>An interactive summary of the CoKRAG 2.0 framework.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const playBtn = document.getElementById('play-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const animationWrapper = document.getElementById('animation-wrapper');
+
+            const elements = [
+                // Nodes
+                { id: 'q', text: 'The Dark Knight', top: '2%', left: '50%', type: 'node', class: 'bg-slate-200' },
+                { id: 'h1', text: 'Hans Zimmer', top: '18%', left: '50%', type: 'node', class: 'bg-teal-100 text-teal-800', delay: 1 },
+                
+                // Path A (Composer's movies)
+                { id: 'h2a', text: 'Inception', top: '38%', left: '20%', type: 'node', class: 'bg-teal-100 text-teal-800', delay: 2.5 },
+                { id: 'h2b', text: 'Gladiator', top: '38%', left: '50%', type: 'node', class: 'bg-red-100 text-red-800', delay: 2.5 },
+                { id: 'h2c', text: 'Interstellar', top: '38%', left: '80%', type: 'node', class: 'bg-teal-100 text-teal-800', delay: 2.5 },
+
+                // Path B (Budget check)
+                { id: 'h3a', text: 'Budget: $160M', top: '58%', left: '20%', type: 'node', class: 'bg-green-100 text-green-800', delay: 4, icon: 'table' },
+                { id: 'h3b', text: 'Budget: $103M', top: '58%', left: '50%', type: 'node', class: 'bg-red-100 text-red-800', delay: 4, icon: 'table' },
+
+                // Synthesis
+                { id: 'h4', text: 'L. DiCaprio', top: '78%', left: '20%', type: 'node', class: 'bg-teal-200 text-teal-900', delay: 5.5 },
+                { id: 'ans', text: 'Image Found', top: '95%', left: '20%', type: 'node', class: 'bg-teal-500 text-white font-bold', delay: 7, pulse: true, icon: 'image' },
+
+                // Lines
+                { from: 'q', to: 'h1', type: 'line', delay: 1.5, length: 70, angle: 90 },
+                { from: 'h1', to: 'h2a', type: 'line', delay: 3, length: 155, angle: 145 },
+                { from: 'h1', to: 'h2b', type: 'line', delay: 3, length: 90, angle: 90 },
+                { from: 'h1', to: 'h2c', type: 'line', delay: 3, length: 155, angle: 35 },
+                { from: 'h2a', to: 'h3a', type: 'line', delay: 4.5, length: 90, angle: 90 },
+                { from: 'h2b', to: 'h3b', type: 'line', delay: 4.5, length: 90, angle: 90 },
+                { from: 'h3a', to: 'h4', type: 'line', delay: 6, length: 90, angle: 90 },
+                { from: 'h4', to: 'ans', type: 'line', delay: 7.5, length: 75, angle: 90 },
+            ];
+            
+            const icons = {
+                table: `<svg class="w-4 h-4 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.375 19.5h17.25m-17.25 0a1.125 1.125 0 0 1-1.125-1.125V6.375m1.125 13.125A1.125 1.125 0 0 0 4.5 18.375h15A1.125 1.125 0 0 0 20.625 19.5m-17.25 0V6.375m17.25 13.125V6.375m0 0A1.125 1.125 0 0 0 19.5 5.25h-15A1.125 1.125 0 0 0 3.375 6.375m16.125 0-16.125 0m16.125 0v13.125" /></svg>`,
+                image: `<svg class="w-4 h-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Z" /></svg>`
+            };
+
+            function createNode(el) {
+                const node = document.createElement('div');
+                node.id = `node-${el.id}`;
+                node.className = `anim-node ${el.class}`;
+                node.style.top = el.top;
+                node.style.left = el.left;
+                node.style.transform = 'translateX(-50%)';
+                node.style.transitionDelay = `${el.delay}s`;
+                if (el.pulse) {
+                    node.style.animationDelay = `${el.delay + 1}s`;
+                }
+                if (el.icon && icons[el.icon]) {
+                    node.innerHTML = icons[el.icon] + `<span>${el.text}</span>`;
+                } else {
+                    node.textContent = el.text;
+                }
+                return node;
+            }
+
+            function createLine(el, nodes) {
+                const fromNode = nodes.find(n => n.id === `node-${el.from}`);
+                if (!fromNode) {
+                    console.error("Animation line 'from' node not found:", el.from);
+                    return document.createElement('div');
+                }
+                
+                const fromRect = { x: parseFloat(fromNode.style.left), y: parseFloat(fromNode.style.top) };
+                
+                const line = document.createElement('div');
+                line.className = 'anim-line';
+                line.style.top = `calc(${fromRect.y}% + 1.75rem)`;
+                line.style.left = `${fromRect.x}%`;
+                line.style.setProperty('--line-width', `${el.length}px`);
+                line.style.transform = `rotate(${el.angle}deg)`;
+                line.style.transitionDelay = `${el.delay}s`;
+                return line;
+            }
+
+            function setupAnimation() {
+                animationWrapper.innerHTML = '';
+                animationWrapper.classList.remove('is-playing');
+
+                const nodeElements = elements.filter(el => el.type === 'node').map(createNode);
+                const lineElements = elements.filter(el => el.type === 'line').map(el => createLine(el, nodeElements));
+
+                [...nodeElements, ...lineElements].forEach(el => animationWrapper.appendChild(el));
+            }
+
+            function playAnimation() {
+                 if (animationWrapper.classList.contains('is-playing')) return;
+                setupAnimation();
+                setTimeout(() => {
+                    animationWrapper.classList.add('is-playing');
+                    
+                    // Prune Gladiator path
+                    setTimeout(() => {
+                        document.getElementById('node-h2b').classList.add('pruned');
+                        document.getElementById('node-h3b').classList.add('pruned');
+                    }, 5000);
+
+                    const finalAnswer = document.getElementById('node-ans');
+                    if (finalAnswer) {
+                       const finalElementData = elements.find(e => e.id === 'ans');
+                       if (finalElementData) {
+                           const pulseDelay = finalElementData.delay * 1000 + 500;
+                           setTimeout(() => {
+                               finalAnswer.classList.add('final-answer-pulse');
+                           }, pulseDelay);
+                       }
+                    }
+                }, 50);
+            }
+
+            playBtn.addEventListener('click', playAnimation);
+            resetBtn.addEventListener('click', setupAnimation);
+            setupAnimation();
+        });
+    </script>
+
+</body>
+</html>
